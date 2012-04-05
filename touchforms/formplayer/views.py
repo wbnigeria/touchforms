@@ -16,6 +16,7 @@ import json
 from collections import defaultdict
 from StringIO import StringIO
 from touchforms.formplayer.signals import xform_received
+from django.core.files import File
 from django.template.context import RequestContext
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_exempt
@@ -23,17 +24,27 @@ import tempfile
 import os
 from . import api
 
-def xform_list(request):
-    def create_xform(data, name="No Name"):
+def xform_list(request, xform_id=None):
+
+    def create_xform(data, name="No Name", xform_id=None):
         new_form = None
         try:
             tmp_file_handle, tmp_file_path = tempfile.mkstemp()
             tmp_file = os.fdopen(tmp_file_handle, 'w')
             tmp_file.write(data)
             tmp_file.close()
-            new_form = XForm.from_file(tmp_file_path, name)
-            notice = "Created form: %s " % file
-            success = True
+            if xform_id:
+                file = File(open(tmp_file_path, 'r'))
+                print 'GETTING FILE! XFORM_ID IS %s' % xform_id
+                xform = get_object_or_404(XForm, xform_id)
+                xform.file = file
+                xform.save()
+                success = True
+                notice = "Updated form %s" % name
+            else:
+                new_form = XForm.from_file(tmp_file_path, name)
+                notice = "Created form: %s " % name
+                success = True
         except Exception, e:
             logging.error("Problem creating xform from %s: %s" % (name, e))
             success = False
@@ -45,9 +56,9 @@ def xform_list(request):
     notice = ""
     if request.method == "POST":
         if "file" in request.FILES:
-            new_form, success, notice = create_xform(request.FILES["file"].read(), str(request.FILES["file"]))
+            new_form, success, notice = create_xform(request.FILES["file"].read(), str(request.FILES["file"]), xform_id)
         elif "xform" in request.POST:
-            new_form, success, notice = create_xform(request.POST["xform"], request.POST["name"])
+            new_form, success, notice = create_xform(request.POST["xform"], request.POST["name"], xform_id)
         else:
             success = False
             notice = "No uploaded file set."

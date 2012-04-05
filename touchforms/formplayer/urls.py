@@ -7,7 +7,7 @@ xform_info = {
 }
 
 urlpatterns = patterns('',
-    url(r'^$', 'touchforms.formplayer.views.xform_list', name="xform_list"),
+    url(r'^(?P<xform_id>.*)$', 'touchforms.formplayer.views.xform_list', name="xform_list"),
     url(r'^enter/(?P<xform_id>.*)$', 'touchforms.formplayer.views.enter_form', name='xform_play'),
     url(r'^enterkb/(?P<xform_id>.*)$', 'touchforms.formplayer.views.enter_form', {'input_mode': 'type'}, name='xform_play_kb'),
     url(r'^enterall/(?P<xform_id>.*)$', 'touchforms.formplayer.views.enter_form', {'input_mode': 'full'}, name='xform_play_all'),
