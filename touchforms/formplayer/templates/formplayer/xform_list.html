@@ -17,7 +17,7 @@
 {% for namespace, xforms in forms_by_namespace.items %}
     {% if forloop.first %}
     <thead>
-        <!--th>Name</th-->
+        <th>Name</th>
         <th>Namespace</th>
         <th>Created</th>
         <th>Version</th>
@@ -28,7 +28,7 @@
     {% endif %}
     {% for xform in xforms %}
         <tr class="{% cycle "odd" "even" %}">
-            <!--td>{{ xform.name }}</td-->
+            <td>{{ xform.name }}</td>
             {% if forloop.first %}
                 <td class="namespace" rowspan="{{ xforms|length }}">
                     {# [<a href="{% url xform_download_excel %}?xmlns={{namespace}}">excel</a>] #}
