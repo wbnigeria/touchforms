@@ -24,23 +24,30 @@ import os
 from . import api
 
 def xform_list(request):
+    def create_xform(data, name="No Name"):
+        new_form = None
+        try:
+            tmp_file_handle, tmp_file_path = tempfile.mkstemp()
+            tmp_file = os.fdopen(tmp_file_handle, 'w')
+            tmp_file.write(data)
+            tmp_file.close()
+            new_form = XForm.from_file(tmp_file_path, name)
+            notice = "Created form: %s " % file
+            success = True
+        except Exception, e:
+            logging.error("Problem creating xform from %s: %s" % (name, e))
+            success = False
+            notice = "Problem creating xform from %s: %s" % (name, e)
+        return new_form, notice, success,
+
     forms_by_namespace = defaultdict(list)
     success = True
     notice = ""
     if request.method == "POST":
         if "file" in request.FILES:
-            file = request.FILES["file"]
-            try:
-                tmp_file_handle, tmp_file_path = tempfile.mkstemp()
-                tmp_file = os.fdopen(tmp_file_handle, 'w')
-                tmp_file.write(file.read())
-                tmp_file.close()
-                new_form = XForm.from_file(tmp_file_path, str(file))
-                notice = "Created form: %s " % file
-            except Exception, e:
-                logging.error("Problem creating xform from %s: %s" % (file, e))
-                success = False
-                notice = "Problem creating xform from %s: %s" % (file, e)
+            new_form, success, notice = create_xform(request.FILES["file"].read(), str(request.FILES["file"]))
+        elif "xform" in request.POST:
+            new_form, success, notice = create_xform(request.POST["xform"], request.POST["name"])
         else:
             success = False
             notice = "No uploaded file set."
