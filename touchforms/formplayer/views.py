@@ -36,7 +36,7 @@ def xform_list(request, xform_id=None):
             if xform_id:
                 file = File(open(tmp_file_path, 'r'))
                 print 'GETTING FILE! XFORM_ID IS %s' % xform_id
-                xform = get_object_or_404(XForm, xform_id)
+                xform = get_object_or_404(XForm, id=xform_id)
                 xform.file = file
                 xform.save()
                 success = True
@@ -101,17 +101,17 @@ def enter_form(request, **kwargs):
 
     if not xform:
         xform = get_object_or_404(XForm, id=xform_id)
-        
+
     if request.method == "POST":
         if request.POST["type"] == 'form-complete':
             instance_xml = request.POST["output"]
-            return form_entry_complete(request, xform, instance_xml, 
+            return form_entry_complete(request, xform, instance_xml,
                                        submit_callback)
 
         elif request.POST["type"] == 'form-aborted':
             return form_entry_abort(request, xform, abort_callback)
 
-    return form_entry_new(request, xform, instance_xml, preloader_data, 
+    return form_entry_new(request, xform, instance_xml, preloader_data,
                           input_mode, force_template)
 
 # TODO: instance loading
