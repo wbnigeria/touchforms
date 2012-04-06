@@ -88,8 +88,8 @@ def handle_request (content, **kwargs):
         if action == 'new-form':
             if 'form-name' not in content:
                 return {'error': 'form identifier required'}
-            preload_data = content["preloader-data"] if "preloader-data" in content else {}
-            return xformplayer.open_form(content['form-name'], content.get('instance-content'), kwargs.get('extensions', []), preload_data, nav_mode)
+            preload_data = content.get("preloader-data", {})
+            return xformplayer.open_form(content['form-name'], content.get('instance-content'), content.get('lang'), kwargs.get('extensions', []), preload_data, nav_mode)
 
         elif action == 'edit-form':
             return {'error': 'unsupported'}
@@ -148,6 +148,14 @@ def handle_request (content, **kwargs):
                 return {'error': 'session id required'}
             
             return xformplayer.submit_form(content['session-id'], content.get('answers', []), content.get('prevalidated', False))
+
+        elif action == 'set-lang':
+            if 'session-id' not in content:
+                return {'error': 'session id required'}
+            if 'lang' not in content:
+                return {'error': 'language required'}
+            
+            return xformplayer.set_locale(content['session-id'], content['lang'])            
 
         elif action == 'purge-stale':
             if 'window' not in content:
